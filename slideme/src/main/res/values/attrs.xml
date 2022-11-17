@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="CustomSlider">
+        <attr name="csValueFrom" format="integer"/>
+        <attr name="csValueTo" format="integer"/>
+        <attr name="csTrackHeight" format="dimension"/>
+        <attr name="csThumbRadius" format="dimension"/>
+        <attr name="csDefaultThumbPosition" format="integer"/>
+        <attr name="csIsTickVisible" format="boolean"/>
+        <attr name="csTickInterval" format="integer"/>
+        <attr name="csTickRadius" format="dimension"/>
+        <attr name="csIsTickDescVisible" format="boolean"/>
+        <attr name="csTickDescSize" format="dimension"/>
+        <attr name="csIsTickTooltipVisible" format="boolean"/>
+        <attr name="csTickTooltipSize" format="dimension"/>
+        <attr name="csTickTooltipDescSize" format="dimension"/>
+    </declare-styleable>
+
+</resources>
