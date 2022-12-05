@@ -9,8 +9,11 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
-import com.adr.slideme.model.SliderTick
 import com.adr.slideme.R
+import com.adr.slideme.helper.Const
+import com.adr.slideme.model.Margin
+import com.adr.slideme.model.SliderTick
+import kotlin.math.min
 
 /**
  * This custom slider was made because author can't use Slider from material.io. Also didn't find
@@ -30,16 +33,23 @@ class CustomSlider : View {
     private lateinit var tooltipAnimatorSet: AnimatorSet
     private lateinit var tooltipAnimatorSetRev: AnimatorSet
     private lateinit var defaultSelectedTick: SliderTick
+    private var orientation = Const.CustomSliderOrientation.HORIZONTAL.orientation
+    private var type = Const.CustomSliderType.OVERLAY.type
     private var valueFrom = 0
     private var valueTo = 100
     private var trackHeight = 10f
+    private var mainTrackColor = R.color.white
+    private var secondTrackColor = R.color.black
     private var thumbRadius = 15f
     private var defaultThumbPosition = 0
+    private var thumbColor = R.color.black
     private var isTickVisible = false
     private var tickInterval = 100
     private var tickRadius = 7.5f
+    private var tickColor = R.color.white
     private var isTickDescVisible = false
     private var tickDescSize = 18f
+    private var tickDeskColor = R.color.black
     private var isTickTooltipVisible = false
     private val centerY = 50f
     private var thumbCoordinateX = 0f
@@ -47,7 +57,9 @@ class CustomSlider : View {
     private var selectedTick = SliderTick(0f, 0f, 0)
     private var isFirstDraw = true
     private var tooltipWidth = 0f
+    private var tickTooltipColor = R.color.white
     private var tooltipDescSize = 0f
+    private var tickTooltipDescColor = R.color.black
     private var sliderValueListener: ((value: Int) -> Unit)? = null
 
     constructor(context: Context) : super(context) {
@@ -69,20 +81,39 @@ class CustomSlider : View {
     private fun initialize(context: Context, attrs: AttributeSet?) {
         context.theme.obtainStyledAttributes(attrs, R.styleable.CustomSlider, 0, 0).apply {
             try {
+                orientation = getInteger(
+                    R.styleable.CustomSlider_csOrientation,
+                    Const.CustomSliderOrientation.HORIZONTAL.orientation
+                )
+                type =
+                    getInteger(R.styleable.CustomSlider_csType, Const.CustomSliderType.OVERLAY.type)
                 valueFrom = getInteger(R.styleable.CustomSlider_csValueFrom, 0)
                 valueTo = getInteger(R.styleable.CustomSlider_csValueTo, 100)
                 trackHeight = getDimension(R.styleable.CustomSlider_csTrackHeight, 10f)
+                mainTrackColor =
+                    getResourceId(R.styleable.CustomSlider_csMainTrackColor, R.color.white)
+                secondTrackColor =
+                    getResourceId(R.styleable.CustomSlider_csSecondTrackColor, R.color.black)
                 thumbRadius = getDimension(R.styleable.CustomSlider_csThumbRadius, 15f)
-                defaultThumbPosition = getInteger(R.styleable.CustomSlider_csDefaultThumbPosition, 0)
+                defaultThumbPosition =
+                    getInteger(R.styleable.CustomSlider_csDefaultThumbPosition, 0)
+                thumbColor = getResourceId(R.styleable.CustomSlider_csThumbColor, R.color.black)
                 isTickVisible = getBoolean(R.styleable.CustomSlider_csIsTickVisible, false)
                 tickInterval = getInteger(R.styleable.CustomSlider_csTickInterval, 100)
                 tickRadius = getDimension(R.styleable.CustomSlider_csTickRadius, 7f)
+                tickColor = getResourceId(R.styleable.CustomSlider_csTickColor, R.color.white)
                 isTickDescVisible = getBoolean(R.styleable.CustomSlider_csIsTickDescVisible, false)
                 tickDescSize = getDimension(R.styleable.CustomSlider_csTickDescSize, 18f)
+                tickDeskColor =
+                    getResourceId(R.styleable.CustomSlider_csTickDescColor, R.color.black)
                 isTickTooltipVisible =
                     getBoolean(R.styleable.CustomSlider_csIsTickTooltipVisible, false)
                 tooltipWidth = getDimension(R.styleable.CustomSlider_csTickTooltipSize, 30f)
+                tickTooltipColor =
+                    getResourceId(R.styleable.CustomSlider_csTickTooltipColor, R.color.white)
                 tooltipDescSize = getDimension(R.styleable.CustomSlider_csTickTooltipDescSize, 18f)
+                tickTooltipDescColor =
+                    getResourceId(R.styleable.CustomSlider_csTickTooltipDescColor, R.color.black)
             } finally {
                 recycle()
             }
@@ -93,7 +124,7 @@ class CustomSlider : View {
         baseLinePaint = Paint()
         setPaintProp(
             baseLinePaint,
-            ContextCompat.getColor(context, R.color.white),
+            ContextCompat.getColor(context, mainTrackColor),
             true,
             style = Paint.Style.FILL,
             strokeWidth = trackHeight,
@@ -104,7 +135,7 @@ class CustomSlider : View {
         secondLinePaint = Paint()
         setPaintProp(
             secondLinePaint,
-            ContextCompat.getColor(context, R.color.white),
+            ContextCompat.getColor(context, secondTrackColor),
             true,
             style = Paint.Style.FILL,
             strokeWidth = trackHeight + 5,
@@ -115,7 +146,7 @@ class CustomSlider : View {
         thumbPaint = Paint()
         setPaintProp(
             thumbPaint,
-            ContextCompat.getColor(context, R.color.white),
+            ContextCompat.getColor(context, thumbColor),
             true,
             style = Paint.Style.FILL
         )
@@ -124,7 +155,7 @@ class CustomSlider : View {
         tickPaint = Paint()
         setPaintProp(
             tickPaint,
-            ContextCompat.getColor(context, R.color.white),
+            ContextCompat.getColor(context, tickColor),
             true,
             style = Paint.Style.FILL
         )
@@ -133,7 +164,7 @@ class CustomSlider : View {
         tickDescPaint = Paint()
         setPaintProp(
             tickDescPaint,
-            ContextCompat.getColor(context, R.color.white),
+            ContextCompat.getColor(context, tickDeskColor),
             true,
             typeface = ResourcesCompat.getFont(context, R.font.roboto_regular),
             textSize = tickDescSize
@@ -143,7 +174,7 @@ class CustomSlider : View {
         tickTooltipPaint = Paint()
         setPaintProp(
             tickTooltipPaint,
-            ContextCompat.getColor(context, R.color.yellow_700),
+            ContextCompat.getColor(context, tickTooltipColor),
             true,
             style = Paint.Style.FILL_AND_STROKE
         )
@@ -152,7 +183,7 @@ class CustomSlider : View {
         tickTooltipDescPaint = Paint()
         setPaintProp(
             tickTooltipDescPaint,
-            ContextCompat.getColor(context, R.color.white),
+            ContextCompat.getColor(context, tickTooltipDescColor),
             true,
             typeface = ResourcesCompat.getFont(context, R.font.roboto_regular),
             textSize = tooltipDescSize
@@ -164,40 +195,58 @@ class CustomSlider : View {
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        setMeasuredDimension(500, 100)
+        val defaultHeight = 100
+        val heightMode = MeasureSpec.getMode(heightMeasureSpec)
+        val heightSize = MeasureSpec.getSize(heightMeasureSpec)
+
+        var height = 0
+        // Measure height
+        height = when(heightMode) {
+            MeasureSpec.EXACTLY -> {
+                // Must be this size
+                heightSize
+            }
+            MeasureSpec.AT_MOST -> {
+                // Can't be bigger than
+                min(defaultHeight, heightSize)
+            }
+            else -> {
+                // Up to you
+                defaultHeight
+            }
+        }
+        setMeasuredDimension(widthMeasureSpec, height)
     }
 
     override fun onDraw(canvas: Canvas) {
         canvas.save()
         // Draw tick circle
         if (isTickVisible) {
-            if (isTickVisible && isTickIntervalValid()) {
-                if (isTickIntervalValid()) {
-                    setTickCoordinate()
-                    for (coordinate in listTickCoordinates) {
-                        canvas.drawCircle(
-                            coordinate.coordinateX,
-                            coordinate.coordinateY,
-                            tickRadius,
-                            tickPaint
+            if (isTickIntervalValid()) {
+                setTickCoordinate()
+                for (coordinate in listTickCoordinates) {
+                    canvas.drawCircle(
+                        coordinate.coordinateX,
+                        coordinate.coordinateY,
+                        tickRadius,
+                        tickPaint
+                    )
+                    if (isTickDescVisible) {
+                        val desc = "${coordinate.value} min"
+                        drawText(
+                            canvas,
+                            desc,
+                            tickDescPaint,
+                            getPosition(coordinate.coordinateX, coordinate.coordinateY),
+                            getMargin(top = (thumbRadius * 2))
                         )
-                        if (isTickDescVisible) {
-                            val desc = "${coordinate.value} min}"
-                            drawText(
-                                canvas,
-                                desc,
-                                tickDescPaint,
-                                coordinate.coordinateX,
-                                coordinate.coordinateY,
-                                marginTop = (thumbRadius * 2)
-                            )
-                        }
                     }
-                } else {
-                    throw java.lang.Exception("Tick interval value not valid.")
                 }
+            } else {
+                throw java.lang.Exception("Tick interval value not valid.")
             }
         }
+
         // Draw base line
         canvas.drawLine(
             (thumbRadius * 2),
@@ -210,11 +259,12 @@ class CustomSlider : View {
         // Set x coordinate for thumb, and second line
         var thumbStart: Float = if (isFirstDraw) {
             isFirstDraw = false
-            val sliderTick: SliderTick = if (isDefaultThumbPositionValid() && listTickCoordinates.isNotEmpty()) {
-                listTickCoordinates[defaultThumbPosition - 1]
-            } else {
-                defaultSelectedTick
-            }
+            val sliderTick: SliderTick =
+                if (isDefaultThumbPositionValid() && listTickCoordinates.isNotEmpty()) {
+                    listTickCoordinates[defaultThumbPosition - 1]
+                } else {
+                    defaultSelectedTick
+                }
             sliderValueListener?.invoke(sliderTick.value)
             sliderTick.coordinateX
         } else {
@@ -233,10 +283,14 @@ class CustomSlider : View {
         // Draw thumb circle
         canvas.drawCircle(thumbStart, 50f, thumbRadius, thumbPaint)
 
-
         // Draw tooltip
         if (isTickTooltipVisible) {
-            drawTickToolTip(canvas, tooltipWidth.toInt(), thumbStart, 50f, selectedTick.value)
+            drawTickToolTip(
+                canvas,
+                tooltipWidth.toInt(),
+                getPosition(thumbStart, 50f),
+                selectedTick.value
+            )
         }
         canvas.restore()
     }
@@ -432,17 +486,14 @@ class CustomSlider : View {
         canvas: Canvas,
         text: String,
         paint: Paint,
-        positionX: Float,
-        positionY: Float,
-        marginStart: Float? = null,
-        marginTop: Float? = null,
-        marginEnd: Float? = null,
-        marginBottom: Float? = null
+        position: Pair<Float, Float>,
+        margin: Margin? = null
     ) {
+        val (positionX, positionY) = position
         paint.getTextBounds(text, 0, text.length, boundRect)
         val y = when {
-            marginTop != null -> {
-                (positionY + (boundRect.height() / 2)) + marginTop
+            margin?.top != null -> {
+                (positionY + (boundRect.height() / 2)) + margin.top
             }
             else -> (positionY + (boundRect.height() / 2))
         }
@@ -457,12 +508,12 @@ class CustomSlider : View {
     private fun drawTickToolTip(
         canvas: Canvas,
         widthToolTip: Int,
-        positionX: Float,
-        positionY: Float,
+        position: Pair<Float, Float>,
         value: Int
     ) {
         val halfSideWidth = widthToolTip / 2
         val path = Path()
+        val (positionX, positionY) = position
 
         val pathTriangle = Path()
         pathTriangle.moveTo(positionX, positionY) // Initial bottom point
@@ -488,7 +539,7 @@ class CustomSlider : View {
         val centerTextY = positionY - widthToolTip
 
         tickTooltipDescPaint.textSize = tooltipDescSize
-        drawText(canvas, "$value", tickTooltipDescPaint, positionX, centerTextY, marginTop = null)
+        drawText(canvas, "$value", tickTooltipDescPaint, getPosition(positionX, centerTextY))
     }
 
     fun resetThumbPosition() {
@@ -507,5 +558,18 @@ class CustomSlider : View {
 
     fun setValueChangeListener(listener: (value: Int) -> Unit) {
         sliderValueListener = listener
+    }
+
+    private fun getPosition(x: Float, y: Float): Pair<Float, Float> {
+        return Pair(x, y)
+    }
+
+    private fun getMargin(
+        start: Float? = null,
+        top: Float? = null,
+        end: Float? = null,
+        bottom: Float? = null
+    ): Margin {
+        return Margin(start, top, end, bottom)
     }
 }

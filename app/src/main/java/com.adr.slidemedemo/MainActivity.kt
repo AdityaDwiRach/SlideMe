@@ -15,8 +15,12 @@ class MainActivity: Activity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.csSlider.setValueChangeListener {
-            Toast.makeText(this, "Current value : $it", Toast.LENGTH_SHORT).show()
+        binding.csSliderDefault.setValueChangeListener {
+            binding.tvValueDefault.text = it.toString()
+        }
+
+        binding.csSliderCustomColor.setValueChangeListener {
+            binding.tvValueCustomColor.text = it.toString()
         }
     }
 }
