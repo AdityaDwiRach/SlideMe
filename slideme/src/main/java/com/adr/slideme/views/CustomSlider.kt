@@ -11,7 +11,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.adr.slideme.R
 import com.adr.slideme.helper.Const
+import com.adr.slideme.helper.CustomSliderHelper
 import com.adr.slideme.model.Margin
+import com.adr.slideme.model.PaintProp
 import com.adr.slideme.model.SliderTick
 import kotlin.math.min
 
@@ -100,7 +102,7 @@ class CustomSlider : View {
                 thumbColor = getResourceId(R.styleable.CustomSlider_csThumbColor, R.color.black)
                 isTickVisible = getBoolean(R.styleable.CustomSlider_csIsTickVisible, false)
                 tickInterval = getInteger(R.styleable.CustomSlider_csTickInterval, 100)
-                tickRadius = getDimension(R.styleable.CustomSlider_csTickRadius, 7f)
+                tickRadius = getDimension(R.styleable.CustomSlider_csTickRadius, 7.5f)
                 tickColor = getResourceId(R.styleable.CustomSlider_csTickColor, R.color.white)
                 isTickDescVisible = getBoolean(R.styleable.CustomSlider_csIsTickDescVisible, false)
                 tickDescSize = getDimension(R.styleable.CustomSlider_csTickDescSize, 18f)
@@ -124,69 +126,69 @@ class CustomSlider : View {
         baseLinePaint = Paint()
         setPaintProp(
             baseLinePaint,
-            ContextCompat.getColor(context, mainTrackColor),
-            true,
+            PaintProp(color = ContextCompat.getColor(context, mainTrackColor),
+            antiAlias = true,
             style = Paint.Style.FILL,
             strokeWidth = trackHeight,
-            strokeCap = Paint.Cap.ROUND
+            strokeCap = Paint.Cap.ROUND)
         )
 
         // Set paint properties for second line
         secondLinePaint = Paint()
         setPaintProp(
             secondLinePaint,
-            ContextCompat.getColor(context, secondTrackColor),
-            true,
+            PaintProp(color = ContextCompat.getColor(context, secondTrackColor),
+            antiAlias = true,
             style = Paint.Style.FILL,
             strokeWidth = trackHeight + 5,
-            strokeCap = Paint.Cap.ROUND
+            strokeCap = Paint.Cap.ROUND)
         )
 
         // Set paint properties for thumb
         thumbPaint = Paint()
         setPaintProp(
             thumbPaint,
-            ContextCompat.getColor(context, thumbColor),
-            true,
-            style = Paint.Style.FILL
+            PaintProp(color = ContextCompat.getColor(context, thumbColor),
+            antiAlias = true,
+            style = Paint.Style.FILL)
         )
 
         // Set paint properties for tick
         tickPaint = Paint()
         setPaintProp(
             tickPaint,
-            ContextCompat.getColor(context, tickColor),
-            true,
-            style = Paint.Style.FILL
+            PaintProp(color = ContextCompat.getColor(context, tickColor),
+            antiAlias = true,
+            style = Paint.Style.FILL)
         )
 
         // Set paint properties for tick description
         tickDescPaint = Paint()
         setPaintProp(
             tickDescPaint,
-            ContextCompat.getColor(context, tickDeskColor),
-            true,
+            PaintProp(color = ContextCompat.getColor(context, tickDeskColor),
+            antiAlias = true,
             typeface = ResourcesCompat.getFont(context, R.font.roboto_regular),
-            textSize = tickDescSize
+            textSize = tickDescSize)
         )
 
         // Set paint properties for tooltip
         tickTooltipPaint = Paint()
         setPaintProp(
             tickTooltipPaint,
-            ContextCompat.getColor(context, tickTooltipColor),
-            true,
-            style = Paint.Style.FILL_AND_STROKE
+            PaintProp(color = ContextCompat.getColor(context, tickTooltipColor),
+            antiAlias = true,
+            style = Paint.Style.FILL_AND_STROKE)
         )
 
         // Set paint properties for tooltip description
         tickTooltipDescPaint = Paint()
         setPaintProp(
             tickTooltipDescPaint,
-            ContextCompat.getColor(context, tickTooltipDescColor),
-            true,
+            PaintProp(color = ContextCompat.getColor(context, tickTooltipDescColor),
+            antiAlias = true,
             typeface = ResourcesCompat.getFont(context, R.font.roboto_regular),
-            textSize = tooltipDescSize
+            textSize = tooltipDescSize)
         )
 
         setTooltipAnimator(300, tooltipWidth, tooltipDescSize)
@@ -195,53 +197,15 @@ class CustomSlider : View {
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val defaultHeight = 100
-        val heightMode = MeasureSpec.getMode(heightMeasureSpec)
-        val heightSize = MeasureSpec.getSize(heightMeasureSpec)
-
-        var height = 0
-        // Measure height
-        height = when(heightMode) {
-            MeasureSpec.EXACTLY -> {
-                // Must be this size
-                heightSize
-            }
-            MeasureSpec.AT_MOST -> {
-                // Can't be bigger than
-                min(defaultHeight, heightSize)
-            }
-            else -> {
-                // Up to you
-                defaultHeight
-            }
-        }
-        setMeasuredDimension(widthMeasureSpec, height)
+        setMeasuredDimension(widthMeasureSpec, CustomSliderHelper.getHeight(heightMeasureSpec))
     }
 
     override fun onDraw(canvas: Canvas) {
         canvas.save()
         // Draw tick circle
         if (isTickVisible) {
-            if (isTickIntervalValid()) {
-                setTickCoordinate()
-                for (coordinate in listTickCoordinates) {
-                    canvas.drawCircle(
-                        coordinate.coordinateX,
-                        coordinate.coordinateY,
-                        tickRadius,
-                        tickPaint
-                    )
-                    if (isTickDescVisible) {
-                        val desc = "${coordinate.value} min"
-                        drawText(
-                            canvas,
-                            desc,
-                            tickDescPaint,
-                            getPosition(coordinate.coordinateX, coordinate.coordinateY),
-                            getMargin(top = (thumbRadius * 2))
-                        )
-                    }
-                }
+            if (CustomSliderHelper.isTickIntervalValid(valueFrom, valueTo, tickInterval)) {
+                drawTick(canvas)
             } else {
                 throw java.lang.Exception("Tick interval value not valid.")
             }
@@ -256,27 +220,7 @@ class CustomSlider : View {
             baseLinePaint
         )
 
-        // Set x coordinate for thumb, and second line
-        var thumbStart: Float = if (isFirstDraw) {
-            isFirstDraw = false
-            val sliderTick: SliderTick =
-                if (isDefaultThumbPositionValid() && listTickCoordinates.isNotEmpty()) {
-                    listTickCoordinates[defaultThumbPosition - 1]
-                } else {
-                    defaultSelectedTick
-                }
-            sliderValueListener?.invoke(sliderTick.value)
-            sliderTick.coordinateX
-        } else {
-            thumbCoordinateX
-        }
-
-        // Thumb, second line, and tooltip stay on the base line
-        if (thumbStart <= (thumbRadius * 2)) {
-            thumbStart = thumbRadius * 2
-        } else if (thumbStart >= (measuredWidth.toFloat() - (thumbRadius * 2))) {
-            thumbStart = (measuredWidth.toFloat() - (thumbRadius * 2))
-        }
+        val thumbStart = getThumbPosition()
 
         // Draw second line
         canvas.drawLine((thumbRadius * 2), centerY, thumbStart, centerY, secondLinePaint)
@@ -288,7 +232,7 @@ class CustomSlider : View {
             drawTickToolTip(
                 canvas,
                 tooltipWidth.toInt(),
-                getPosition(thumbStart, 50f),
+                CustomSliderHelper.getPosition(thumbStart, 50f),
                 selectedTick.value
             )
         }
@@ -299,12 +243,12 @@ class CustomSlider : View {
         when (event?.actionMasked) {
             MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
                 val x = event.x
-                setThumbToTick(x, event.actionMasked)
+                setThumbToTick(x)
                 tooltipAnimatorSetRev.start()
             }
             MotionEvent.ACTION_MOVE -> {
                 val x = event.x
-                setThumbToTick(x, event.actionMasked)
+                thumbCoordinateX = x
                 invalidate()
             }
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
@@ -371,115 +315,90 @@ class CustomSlider : View {
 
     private fun setPaintProp(
         paint: Paint,
-        color: Int,
-        antiAlias: Boolean,
-        style: Paint.Style? = null,
-        strokeWidth: Float? = null,
-        strokeCap: Paint.Cap? = null,
-        typeface: Typeface? = null,
-        textSize: Float? = null
+        paintProp: PaintProp
     ) {
-        paint.color = color
-        paint.isAntiAlias = antiAlias
-        style?.let {
-            paint.style = it
+        with(paintProp) {
+            color?.let {
+                paint.color = it
+            }
+            paint.isAntiAlias = antiAlias
+            style?.let {
+                paint.style = it
+            }
+            strokeWidth?.let {
+                paint.strokeWidth = it
+            }
+            strokeCap?.let {
+                paint.strokeCap = it
+            }
+            typeface?.let {
+                paint.typeface = it
+            }
+            textSize?.let {
+                paint.textSize = it
+            }
         }
-        strokeWidth?.let {
-            paint.strokeWidth = it
+    }
+
+    private fun getThumbPosition(): Float {
+        // Set x coordinate for thumb, and second line
+        var thumbStart: Float = if (isFirstDraw) {
+            isFirstDraw = false
+            val sliderTick: SliderTick =
+                if (CustomSliderHelper.isDefaultThumbPositionValid(listTickCoordinates, defaultThumbPosition) && listTickCoordinates.isNotEmpty()) {
+                    listTickCoordinates[defaultThumbPosition - 1]
+                } else {
+                    defaultSelectedTick
+                }
+            sliderValueListener?.invoke(sliderTick.value)
+            sliderTick.coordinateX
+        } else {
+            thumbCoordinateX
         }
-        strokeCap?.let {
-            paint.strokeCap = it
+
+        // Thumb, second line, and tooltip stay on the base line
+        if (thumbStart <= (thumbRadius * 2)) {
+            thumbStart = thumbRadius * 2
+        } else if (thumbStart >= (measuredWidth.toFloat() - (thumbRadius * 2))) {
+            thumbStart = (measuredWidth.toFloat() - (thumbRadius * 2))
         }
-        typeface?.let {
-            paint.typeface = it
-        }
-        textSize?.let {
-            paint.textSize = it
-        }
+
+        return thumbStart
     }
 
     private fun setTickCoordinate() {
-        val listCoordinate = arrayListOf<SliderTick>()
-        val amount = ((valueTo - valueFrom) / tickInterval)
-        val intervalSpace = (measuredWidth.toFloat() - (thumbRadius * 4)) / amount
-        var coordinateX = 0f
-        for ((index, value) in (valueFrom..valueTo step tickInterval).withIndex()) {
-            if (index == 0) {
-                coordinateX = thumbRadius * 2
-            } else {
-                coordinateX += intervalSpace
-            }
-            listCoordinate.add(SliderTick(coordinateX, centerY, value))
-        }
-        this.listTickCoordinates = listCoordinate
+        this.listTickCoordinates = CustomSliderHelper.getTickCoordinate(valueFrom, valueTo, tickInterval, measuredWidth, thumbRadius, centerY)
     }
 
-    private fun isTickIntervalValid(): Boolean {
-        val rangeValue = valueTo - valueFrom
-        return (rangeValue % tickInterval) == 0
-    }
+    private fun setThumbToTick(touchX: Float) {
+        val currentTickCoor = CustomSliderHelper.getCurrentTickCoor(listTickCoordinates, touchX)
 
-    private fun isDefaultThumbPositionValid(): Boolean {
-        return (defaultThumbPosition <= listTickCoordinates.size - 1) && (defaultThumbPosition > 0)
-    }
-
-    private fun setThumbToTick(touchX: Float, actionType: Int) {
-        var currentTickCoor = SliderTick(0f, 0f, 0)
-        var currentMinRange: Float
-        var leftIndex = 0
-        var rightIndex = listTickCoordinates.size - 1
-        val findCoor = listTickCoordinates.find { it.coordinateX == touchX }
-        findCoor?.let {
-            currentTickCoor = it
-            when (actionType) {
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
-                    thumbCoordinateX = it.coordinateX
-                    sliderValueListener?.invoke(it.value)
-                }
-                MotionEvent.ACTION_MOVE -> thumbCoordinateX = touchX
-                else -> Unit
-            }
-
-        } ?: run {
-            while (true) {
-                val leftMinRange: Float = if (listTickCoordinates[leftIndex].coordinateX < touchX) {
-                    touchX - listTickCoordinates[leftIndex].coordinateX
-                } else {
-                    listTickCoordinates[leftIndex].coordinateX - touchX
-                }
-
-                val rightMinRange: Float =
-                    if (listTickCoordinates[rightIndex].coordinateX > touchX) {
-                        listTickCoordinates[rightIndex].coordinateX - touchX
-                    } else {
-                        touchX - listTickCoordinates[rightIndex].coordinateX
-                    }
-
-                currentMinRange = minOf(leftMinRange, rightMinRange)
-                currentTickCoor = if (currentMinRange == leftMinRange) {
-                    rightIndex--
-                    listTickCoordinates[leftIndex]
-                } else {
-                    leftIndex++
-                    listTickCoordinates[rightIndex]
-                }
-
-                if (leftIndex == rightIndex) {
-                    break
-                }
-            }
-
-            when (actionType) {
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
-                    thumbCoordinateX = currentTickCoor.coordinateX
-                    sliderValueListener?.invoke(currentTickCoor.value)
-                }
-                MotionEvent.ACTION_MOVE -> thumbCoordinateX = touchX
-                else -> Unit
-            }
-        }
+        thumbCoordinateX = currentTickCoor.coordinateX
+        sliderValueListener?.invoke(currentTickCoor.value)
 
         selectedTick = currentTickCoor
+    }
+
+    private fun drawTick(canvas: Canvas) {
+        setTickCoordinate()
+        for (coordinate in listTickCoordinates) {
+            canvas.drawCircle(
+                coordinate.coordinateX,
+                coordinate.coordinateY,
+                tickRadius,
+                tickPaint
+            )
+            if (isTickDescVisible) {
+                val desc = "${coordinate.value} min"
+                drawText(
+                    canvas,
+                    desc,
+                    tickDescPaint,
+                    CustomSliderHelper.getPosition(coordinate.coordinateX, coordinate.coordinateY),
+                    CustomSliderHelper.getMargin(top = (thumbRadius * 2))
+                )
+            }
+        }
     }
 
     private fun drawText(
@@ -505,6 +424,20 @@ class CustomSlider : View {
         )
     }
 
+    private fun drawTriangle(positionX: Float, positionY: Float, width: Int): Path {
+        val pathTriangle = Path()
+        pathTriangle.moveTo(positionX, positionY) // Initial bottom point
+        pathTriangle.lineTo(
+            (positionX + (width / 2)),
+            (positionY - width)) // To top right point
+        pathTriangle.lineTo(
+            (positionX - (width / 2)),
+            (positionY - width))  // To top left point
+        pathTriangle.lineTo(positionX, positionY) // Back to initial bottom point
+
+        return pathTriangle
+    }
+
     private fun drawTickToolTip(
         canvas: Canvas,
         widthToolTip: Int,
@@ -512,39 +445,29 @@ class CustomSlider : View {
         value: Int
     ) {
         val halfSideWidth = widthToolTip / 2
-        val path = Path()
+        val pathTooltip = Path()
         val (positionX, positionY) = position
 
-        val pathTriangle = Path()
-        pathTriangle.moveTo(positionX, positionY) // Initial bottom point
-        pathTriangle.lineTo(
-            (positionX + halfSideWidth),
-            (positionY - widthToolTip)
-        ) // To top right point
-        pathTriangle.lineTo(
-            (positionX - halfSideWidth),
-            (positionY - widthToolTip)
-        )  // To top left point
-        pathTriangle.lineTo(positionX, positionY) // Back to initial bottom point
+        val pathTriangle = drawTriangle(positionX, positionY, widthToolTip)
         val pathCircle = Path()
         pathCircle.addCircle(
             positionX,
             (positionY - widthToolTip), halfSideWidth.toFloat(), Path.Direction.CW
         )
-        path.op(pathTriangle, pathCircle, Path.Op.UNION)
+        pathTooltip.op(pathTriangle, pathCircle, Path.Op.UNION)
         pathCircle.close()
         pathTriangle.close()
-        path.close()
-        canvas.drawPath(path, tickTooltipPaint)
+        pathTooltip.close()
+        canvas.drawPath(pathTooltip, tickTooltipPaint)
         val centerTextY = positionY - widthToolTip
 
         tickTooltipDescPaint.textSize = tooltipDescSize
-        drawText(canvas, "$value", tickTooltipDescPaint, getPosition(positionX, centerTextY))
+        drawText(canvas, "$value", tickTooltipDescPaint, CustomSliderHelper.getPosition(positionX, centerTextY))
     }
 
     fun resetThumbPosition() {
         isFirstDraw = true
-        if (isTickVisible && isDefaultThumbPositionValid() && listTickCoordinates.isNotEmpty()) {
+        if (isTickVisible && CustomSliderHelper.isDefaultThumbPositionValid(listTickCoordinates, defaultThumbPosition) && listTickCoordinates.isNotEmpty()) {
             selectedTick = listTickCoordinates[defaultThumbPosition - 1]
         }
         invalidate()
@@ -558,18 +481,5 @@ class CustomSlider : View {
 
     fun setValueChangeListener(listener: (value: Int) -> Unit) {
         sliderValueListener = listener
-    }
-
-    private fun getPosition(x: Float, y: Float): Pair<Float, Float> {
-        return Pair(x, y)
-    }
-
-    private fun getMargin(
-        start: Float? = null,
-        top: Float? = null,
-        end: Float? = null,
-        bottom: Float? = null
-    ): Margin {
-        return Margin(start, top, end, bottom)
     }
 }
