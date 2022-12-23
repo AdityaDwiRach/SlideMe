@@ -1,12 +1,56 @@
 package com.adr.slideme.helper
 
-import android.transition.Slide
 import android.view.View
 import com.adr.slideme.model.Margin
 import com.adr.slideme.model.SliderTick
 import kotlin.math.min
 
 object CustomSliderHelper {
+
+    private fun validateSecondTrackHeight(
+        secondTrackHeight: Float,
+        isTickVisible: Boolean,
+        tickRadius: Float
+    ): Float {
+        return if (isTickVisible && secondTrackHeight <= (tickRadius * 2)) {
+            (tickRadius * 2.1f)
+        } else {
+            secondTrackHeight
+        }
+    }
+
+    fun getSecondTrackHeight(
+        trackHeight: Float,
+        secondTrackHeight: Float,
+        isTickVisible: Boolean,
+        tickRadius: Float,
+        type: Int
+    ): Float {
+        val tempHeight: Float = if (type == Const.Type.OVERLAY.type && secondTrackHeight != 0f) {
+            secondTrackHeight
+        } else {
+            (trackHeight + 5)
+        }
+
+        return validateSecondTrackHeight(tempHeight, isTickVisible, tickRadius)
+    }
+
+    fun getSecondTrackColor(type: Int, mainTrackColor: Int, secondTrackColor: Int): Int {
+        return if (type == Const.Type.OVERLAY.type) mainTrackColor else secondTrackColor
+    }
+
+    fun getThumbColor(type: Int, mainTrackColor: Int, thumbColor: Int): Int {
+        return if (type == Const.Type.OVERLAY.type) mainTrackColor else thumbColor
+    }
+
+    fun getThumbSize(thumbRadius: Float, mainTrackHeight: Float): Float {
+        // Thumb size should not be smaller than main track height
+        return if ((thumbRadius * 2) > mainTrackHeight) {
+            thumbRadius
+        } else {
+            (mainTrackHeight * 1.5f)
+        }
+    }
 
     fun getTickCoordinate(
         valueFrom: Int,
@@ -95,7 +139,7 @@ object CustomSliderHelper {
         val heightSize = View.MeasureSpec.getSize(heightMeasureSpec)
 
         // Measure height
-        val height: Int = when(heightMode) {
+        val height: Int = when (heightMode) {
             View.MeasureSpec.EXACTLY -> {
                 // Must be this size
                 heightSize
@@ -112,7 +156,10 @@ object CustomSliderHelper {
         return height
     }
 
-    fun isDefaultThumbPositionValid(listTickCoordinates: List<SliderTick>, defaultThumbPosition: Int): Boolean {
+    fun isDefaultThumbPositionValid(
+        listTickCoordinates: List<SliderTick>,
+        defaultThumbPosition: Int
+    ): Boolean {
         return (defaultThumbPosition <= listTickCoordinates.size - 1) && (defaultThumbPosition > 0)
     }
 

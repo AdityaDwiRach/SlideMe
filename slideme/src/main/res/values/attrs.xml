@@ -13,6 +13,7 @@
         <attr name="csValueFrom" format="integer"/>
         <attr name="csValueTo" format="integer"/>
         <attr name="csTrackHeight" format="dimension"/>
+        <attr name="csSecondTrackHeight" format="dimension"/>
         <attr name="csMainTrackColor" format="reference"/>
         <attr name="csSecondTrackColor" format="reference"/>
         <attr name="csThumbRadius" format="dimension"/>
@@ -28,6 +29,12 @@
         <attr name="csIsTickTooltipVisible" format="boolean"/>
         <attr name="csTickTooltipSize" format="dimension"/>
         <attr name="csTickTooltipColor" format="reference"/>
+        <attr name="csTickTooltipPosition" format="enum">
+            <enum name="left" value="0"/>
+            <enum name="top" value="1"/>
+            <enum name="right" value="2"/>
+            <enum name="bottom" value="3"/>
+        </attr>
         <attr name="csTickTooltipDescSize" format="dimension"/>
         <attr name="csTickTooltipDescColor" format="reference"/>
     </declare-styleable>

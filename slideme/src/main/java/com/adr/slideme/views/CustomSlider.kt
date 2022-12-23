@@ -15,7 +15,6 @@ import com.adr.slideme.helper.CustomSliderHelper
 import com.adr.slideme.model.Margin
 import com.adr.slideme.model.PaintProp
 import com.adr.slideme.model.SliderTick
-import kotlin.math.min
 
 /**
  * This custom slider was made because author can't use Slider from material.io. Also didn't find
@@ -35,11 +34,12 @@ class CustomSlider : View {
     private lateinit var tooltipAnimatorSet: AnimatorSet
     private lateinit var tooltipAnimatorSetRev: AnimatorSet
     private lateinit var defaultSelectedTick: SliderTick
-    private var orientation = Const.CustomSliderOrientation.HORIZONTAL.orientation
-    private var type = Const.CustomSliderType.OVERLAY.type
+    private var orientation = Const.Orientation.HORIZONTAL.orientation
+    private var type = Const.Type.OVERLAY.type
     private var valueFrom = 0
     private var valueTo = 100
     private var trackHeight = 10f
+    private var secondTrackHeight = 0f
     private var mainTrackColor = R.color.white
     private var secondTrackColor = R.color.black
     private var thumbRadius = 15f
@@ -85,35 +85,36 @@ class CustomSlider : View {
             try {
                 orientation = getInteger(
                     R.styleable.CustomSlider_csOrientation,
-                    Const.CustomSliderOrientation.HORIZONTAL.orientation
+                    Const.Orientation.HORIZONTAL.orientation
                 )
                 type =
-                    getInteger(R.styleable.CustomSlider_csType, Const.CustomSliderType.OVERLAY.type)
+                    getInteger(R.styleable.CustomSlider_csType, Const.Type.OVERLAY.type)
                 valueFrom = getInteger(R.styleable.CustomSlider_csValueFrom, 0)
                 valueTo = getInteger(R.styleable.CustomSlider_csValueTo, 100)
-                trackHeight = getDimension(R.styleable.CustomSlider_csTrackHeight, 10f)
+                trackHeight = getDimension(R.styleable.CustomSlider_csTrackHeight, context.resources.getDimension(R.dimen.defaultTrackHeight))
+                secondTrackHeight = getDimension(R.styleable.CustomSlider_csSecondTrackHeight, 0f)
                 mainTrackColor =
                     getResourceId(R.styleable.CustomSlider_csMainTrackColor, R.color.white)
                 secondTrackColor =
                     getResourceId(R.styleable.CustomSlider_csSecondTrackColor, R.color.black)
-                thumbRadius = getDimension(R.styleable.CustomSlider_csThumbRadius, 15f)
+                thumbRadius = getDimension(R.styleable.CustomSlider_csThumbRadius, context.resources.getDimension(R.dimen.defaultThumbRadius))
                 defaultThumbPosition =
                     getInteger(R.styleable.CustomSlider_csDefaultThumbPosition, 0)
                 thumbColor = getResourceId(R.styleable.CustomSlider_csThumbColor, R.color.black)
                 isTickVisible = getBoolean(R.styleable.CustomSlider_csIsTickVisible, false)
                 tickInterval = getInteger(R.styleable.CustomSlider_csTickInterval, 100)
-                tickRadius = getDimension(R.styleable.CustomSlider_csTickRadius, 7.5f)
+                tickRadius = getDimension(R.styleable.CustomSlider_csTickRadius, context.resources.getDimension(R.dimen.defaultTickRadius))
                 tickColor = getResourceId(R.styleable.CustomSlider_csTickColor, R.color.white)
                 isTickDescVisible = getBoolean(R.styleable.CustomSlider_csIsTickDescVisible, false)
-                tickDescSize = getDimension(R.styleable.CustomSlider_csTickDescSize, 18f)
+                tickDescSize = getDimension(R.styleable.CustomSlider_csTickDescSize, context.resources.getDimension(R.dimen.defaultTickDescSize))
                 tickDeskColor =
                     getResourceId(R.styleable.CustomSlider_csTickDescColor, R.color.black)
                 isTickTooltipVisible =
                     getBoolean(R.styleable.CustomSlider_csIsTickTooltipVisible, false)
-                tooltipWidth = getDimension(R.styleable.CustomSlider_csTickTooltipSize, 30f)
+                tooltipWidth = getDimension(R.styleable.CustomSlider_csTickTooltipSize, context.resources.getDimension(R.dimen.defaultTooltipWidth))
                 tickTooltipColor =
                     getResourceId(R.styleable.CustomSlider_csTickTooltipColor, R.color.white)
-                tooltipDescSize = getDimension(R.styleable.CustomSlider_csTickTooltipDescSize, 18f)
+                tooltipDescSize = getDimension(R.styleable.CustomSlider_csTickTooltipDescSize, context.resources.getDimension(R.dimen.defaultTooltipDescSize))
                 tickTooltipDescColor =
                     getResourceId(R.styleable.CustomSlider_csTickTooltipDescColor, R.color.black)
             } finally {
@@ -122,6 +123,7 @@ class CustomSlider : View {
         }
 
         boundRect = Rect()
+
         // Set paint properties for base line
         baseLinePaint = Paint()
         setPaintProp(
@@ -137,10 +139,10 @@ class CustomSlider : View {
         secondLinePaint = Paint()
         setPaintProp(
             secondLinePaint,
-            PaintProp(color = ContextCompat.getColor(context, secondTrackColor),
+            PaintProp(color = ContextCompat.getColor(context, CustomSliderHelper.getSecondTrackColor(type, mainTrackColor, secondTrackColor)),
             antiAlias = true,
             style = Paint.Style.FILL,
-            strokeWidth = trackHeight + 5,
+            strokeWidth = CustomSliderHelper.getSecondTrackHeight(trackHeight, secondTrackHeight, isTickVisible, tickRadius, type),
             strokeCap = Paint.Cap.ROUND)
         )
 
@@ -148,7 +150,7 @@ class CustomSlider : View {
         thumbPaint = Paint()
         setPaintProp(
             thumbPaint,
-            PaintProp(color = ContextCompat.getColor(context, thumbColor),
+            PaintProp(color = ContextCompat.getColor(context, CustomSliderHelper.getThumbColor(type, mainTrackColor, thumbColor)),
             antiAlias = true,
             style = Paint.Style.FILL)
         )
@@ -193,6 +195,7 @@ class CustomSlider : View {
 
         setTooltipAnimator(300, tooltipWidth, tooltipDescSize)
 
+        thumbRadius = CustomSliderHelper.getThumbSize(thumbRadius, trackHeight)
         defaultSelectedTick = SliderTick((thumbRadius * 2), centerY, 0)
     }
 
