@@ -19,8 +19,12 @@ class MainActivity: Activity() {
             binding.tvValueDefault.text = it.toString()
         }
 
-        binding.csSliderCustomColor.setValueChangeListener {
-            binding.tvValueCustomColor.text = it.toString()
+        binding.csSliderHorizontal.setValueChangeListener {
+            binding.tvValueHorizontal.text = it.toString()
+        }
+
+        binding.csSliderVertical.setValueChangeListener {
+            binding.tvValueVertical.text = it.toString()
         }
     }
 }

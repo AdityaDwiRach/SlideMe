@@ -11,7 +11,7 @@ object Const {
         // DIFF_COLOR type means fixed second line height, custom second line and thumb color
         DIFF_COLOR(type = 1)
     }
-    enum class TooltipPosition(val position: Int) {
+    enum class Position(val position: Int) {
         LEFT(position = 0),
         TOP(position = 1),
         RIGHT(position = 2),

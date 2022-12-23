@@ -26,6 +26,12 @@
         <attr name="csIsTickDescVisible" format="boolean"/>
         <attr name="csTickDescSize" format="dimension"/>
         <attr name="csTickDescColor" format="reference"/>
+        <attr name="csTickDescPosition" format="enum">
+            <enum name="left" value="0"/>
+            <enum name="top" value="1"/>
+            <enum name="right" value="2"/>
+            <enum name="bottom" value="3"/>
+        </attr>
         <attr name="csIsTickTooltipVisible" format="boolean"/>
         <attr name="csTickTooltipSize" format="dimension"/>
         <attr name="csTickTooltipColor" format="reference"/>

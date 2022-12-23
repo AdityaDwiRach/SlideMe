@@ -1,5 +1,6 @@
 package com.adr.slideme.helper
 
+import android.util.Log
 import android.view.View
 import com.adr.slideme.model.Margin
 import com.adr.slideme.model.SliderTick
@@ -57,25 +58,35 @@ object CustomSliderHelper {
         valueTo: Int,
         tickInterval: Int,
         measuredWidth: Int,
+        measuredHeight: Int,
         thumbRadius: Float,
-        coordinateY: Float
+        orientation: Int
     ): ArrayList<SliderTick> {
         val listCoordinate = arrayListOf<SliderTick>()
         val amount = ((valueTo - valueFrom) / tickInterval)
-        val intervalSpace = (measuredWidth.toFloat() - (thumbRadius * 4)) / amount
-        var coordinateX = 0f
+        val intervalSpace =
+            if (orientation == Const.Orientation.VERTICAL.orientation) (measuredHeight.toFloat() - (thumbRadius * 4)) / amount else (measuredWidth.toFloat() - (thumbRadius * 4)) / amount
+        var coordinateX =
+            if (orientation == Const.Orientation.VERTICAL.orientation) (measuredWidth.toFloat() / 2) else thumbRadius * 2
+        var coordinateY =
+            if (orientation == Const.Orientation.VERTICAL.orientation) (measuredHeight.toFloat() - (thumbRadius * 2)) else (measuredHeight.toFloat() / 2)
         for ((index, value) in (valueFrom..valueTo step tickInterval).withIndex()) {
-            if (index == 0) {
-                coordinateX = thumbRadius * 2
+            if (orientation == Const.Orientation.VERTICAL.orientation) {
+                if (index != 0) {
+                    coordinateY -= intervalSpace
+                }
             } else {
-                coordinateX += intervalSpace
+                if (index != 0) {
+                    coordinateX += intervalSpace
+                }
             }
             listCoordinate.add(SliderTick(coordinateX, coordinateY, value))
         }
+        Log.d("TESTING2", "getTickCoordinate: ${listCoordinate.toString()}")
         return listCoordinate
     }
 
-    private fun getNearestTick(listTickCoordinates: List<SliderTick>, touchX: Float): SliderTick {
+    private fun getNearestTickX(listTickCoordinates: List<SliderTick>, touchX: Float): SliderTick {
         var currentTickCoor: SliderTick
         var currentMinRange: Float
         var leftIndex = 0
@@ -111,12 +122,57 @@ object CustomSliderHelper {
         return currentTickCoor
     }
 
-    fun getCurrentTickCoor(listTickCoordinates: List<SliderTick>, touchX: Float): SliderTick {
-        val findCoor = listTickCoordinates.find { it.coordinateX == touchX }
+    private fun getNearestTickY(listTickCoordinates: List<SliderTick>, touchY: Float): SliderTick {
+        var currentTickCoor: SliderTick
+        var currentMinRange: Float
+        var bottomIndex = 0
+        var topIndex = listTickCoordinates.size - 1
+        while (true) {
+            val bottomMinRange: Float = if (listTickCoordinates[bottomIndex].coordinateY > touchY) {
+                listTickCoordinates[bottomIndex].coordinateY - touchY
+            } else {
+                touchY - listTickCoordinates[bottomIndex].coordinateY
+            }
+
+            val topMinRange: Float =
+                if (listTickCoordinates[topIndex].coordinateY < touchY) {
+                    touchY - listTickCoordinates[topIndex].coordinateY
+                } else {
+                    listTickCoordinates[topIndex].coordinateY - touchY
+                }
+
+            currentMinRange = minOf(bottomMinRange, topMinRange)
+            currentTickCoor = if (currentMinRange == bottomMinRange) {
+                topIndex--
+                listTickCoordinates[bottomIndex]
+            } else {
+                bottomIndex++
+                listTickCoordinates[topIndex]
+            }
+
+            if (bottomIndex == topIndex) {
+                break
+            }
+        }
+
+        return currentTickCoor
+    }
+
+    fun getCurrentTickCoor(
+        orientation: Int,
+        listTickCoordinates: List<SliderTick>,
+        touchX: Float,
+        touchY: Float
+    ): SliderTick {
+        val findCoor =
+            if (orientation == Const.Orientation.VERTICAL.orientation) listTickCoordinates.find { it.coordinateY == touchY } else listTickCoordinates.find { it.coordinateX == touchX }
         findCoor?.let {
             return it
         } ?: run {
-            return getNearestTick(listTickCoordinates, touchX)
+            return if (orientation == Const.Orientation.VERTICAL.orientation) getNearestTickY(
+                listTickCoordinates,
+                touchY
+            ) else getNearestTickX(listTickCoordinates, touchX)
         }
     }
 
@@ -133,27 +189,27 @@ object CustomSliderHelper {
         return Margin(start, top, end, bottom)
     }
 
-    fun getHeight(heightMeasureSpec: Int): Int {
-        val defaultHeight = 100
-        val heightMode = View.MeasureSpec.getMode(heightMeasureSpec)
-        val heightSize = View.MeasureSpec.getSize(heightMeasureSpec)
+    fun getMeasureSpec(orientation: Int, measureSpec: Int): Int {
+        val default = if (orientation == Const.Orientation.VERTICAL.orientation) 210 else 100
+        val mode = View.MeasureSpec.getMode(measureSpec)
+        val size = View.MeasureSpec.getSize(measureSpec)
 
-        // Measure height
-        val height: Int = when (heightMode) {
+        // Measure
+        val finalSize: Int = when (mode) {
             View.MeasureSpec.EXACTLY -> {
                 // Must be this size
-                heightSize
+                size
             }
             View.MeasureSpec.AT_MOST -> {
                 // Can't be bigger than
-                min(defaultHeight, heightSize)
+                min(default, size)
             }
             else -> {
                 // Up to you
-                defaultHeight
+                default
             }
         }
-        return height
+        return finalSize
     }
 
     fun isDefaultThumbPositionValid(
@@ -166,5 +222,23 @@ object CustomSliderHelper {
     fun isTickIntervalValid(valueFrom: Int, valueTo: Int, tickInterval: Int): Boolean {
         val rangeValue = valueTo - valueFrom
         return (rangeValue % tickInterval) == 0
+    }
+
+    fun validateTickTooltipPosition(tickPosition: Int, tooltipPosition: Int): Boolean {
+        return when (tickPosition) {
+            Const.Position.LEFT.position -> {
+                tooltipPosition == Const.Position.RIGHT.position
+            }
+            Const.Position.TOP.position -> {
+                tooltipPosition == Const.Position.BOTTOM.position
+            }
+            Const.Position.RIGHT.position -> {
+                tooltipPosition == Const.Position.LEFT.position
+            }
+            Const.Position.BOTTOM.position -> {
+                tooltipPosition == Const.Position.TOP.position
+            }
+            else -> false
+        }
     }
 }
