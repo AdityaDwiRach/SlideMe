@@ -1,8 +1,7 @@
 package com.adr.slideme.helper
 
-import android.util.Log
 import android.view.View
-import com.adr.slideme.model.Margin
+import com.adr.slideme.model.Coordinate
 import com.adr.slideme.model.SliderTick
 import kotlin.math.min
 
@@ -82,7 +81,6 @@ object CustomSliderHelper {
             }
             listCoordinate.add(SliderTick(coordinateX, coordinateY, value))
         }
-        Log.d("TESTING2", "getTickCoordinate: ${listCoordinate.toString()}")
         return listCoordinate
     }
 
@@ -176,19 +174,6 @@ object CustomSliderHelper {
         }
     }
 
-    fun getPosition(x: Float, y: Float): Pair<Float, Float> {
-        return Pair(x, y)
-    }
-
-    fun getMargin(
-        start: Float? = null,
-        top: Float? = null,
-        end: Float? = null,
-        bottom: Float? = null
-    ): Margin {
-        return Margin(start, top, end, bottom)
-    }
-
     fun getMeasureSpec(orientation: Int, measureSpec: Int): Int {
         val default = if (orientation == Const.Orientation.VERTICAL.orientation) 210 else 100
         val mode = View.MeasureSpec.getMode(measureSpec)
@@ -240,5 +225,104 @@ object CustomSliderHelper {
             }
             else -> false
         }
+    }
+
+    fun getThumbCoorOnTrack(orientation: Int, measuredWidth: Int, measuredHeight: Int, currentThumbCoor: Float, thumbRadius: Float): Float {
+        // Thumb, second line, and tooltip stay on the base line
+        var thumbStart = currentThumbCoor
+        if (orientation == Const.Orientation.VERTICAL.orientation) {
+            if (thumbStart >= measuredHeight.toFloat() - (thumbRadius * 2)) {
+                thumbStart = measuredHeight.toFloat() - (thumbRadius * 2)
+            } else if (thumbStart <= thumbRadius * 2) {
+                thumbStart = (thumbRadius * 2)
+            }
+        } else {
+            if (thumbStart <= (thumbRadius * 2)) {
+                thumbStart = thumbRadius * 2
+            } else if (thumbStart >= (measuredWidth.toFloat() - (thumbRadius * 2))) {
+                thumbStart = measuredWidth.toFloat() - (thumbRadius * 2)
+            }
+        }
+        return thumbStart
+    }
+
+    fun getTriangleCoor(tickTooltipPosition: Int, positionX: Float, positionY: Float, width: Int): Pair<Coordinate, Coordinate> {
+        val first = Coordinate()
+        val second = Coordinate()
+        when (tickTooltipPosition) {
+            Const.Position.LEFT.position -> {
+                first.apply {
+                    x = positionX - width
+                    y = positionY - (width / 2)
+                }
+                second.apply {
+                    x = positionX - width
+                    y = positionY + (width / 2)
+                }
+            }
+            Const.Position.TOP.position -> {
+                first.apply {
+                    x = positionX + (width / 2)
+                    y = positionY - width
+                }
+                second.apply {
+                    x = positionX - (width / 2)
+                    y = positionY - width
+                }
+            }
+            Const.Position.RIGHT.position -> {
+                first.apply {
+                    x = positionX + width
+                    y = positionY + (width / 2)
+                }
+                second.apply {
+                    x = positionX + width
+                    y = positionY - (width / 2)
+                }
+            }
+            Const.Position.BOTTOM.position -> {
+                first.apply {
+                    x = positionX - (width / 2)
+                    y = positionY + width
+                }
+                second.apply {
+                    x = positionX + (width / 2)
+                    y = positionY + width
+                }
+            }
+        }
+
+        return Pair(first, second)
+    }
+
+    fun getCircleCoor(tickTooltipPosition: Int, positionX: Float, positionY: Float, widthToolTip: Int): Coordinate {
+        val coor = Coordinate()
+        when (tickTooltipPosition) {
+            Const.Position.LEFT.position -> {
+                coor.apply {
+                    x = positionX - widthToolTip
+                    y = positionY
+                }
+            }
+            Const.Position.TOP.position -> {
+                coor.apply {
+                    x = positionX
+                    y = positionY - widthToolTip
+                }
+            }
+            Const.Position.RIGHT.position -> {
+                coor.apply {
+                    x = positionX + widthToolTip
+                    y = positionY
+                }
+            }
+            Const.Position.BOTTOM.position -> {
+                coor.apply {
+                    x = positionX
+                    y = positionY + widthToolTip
+                }
+            }
+        }
+        return coor
     }
 }
