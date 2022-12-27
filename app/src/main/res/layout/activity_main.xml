@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorPrimary">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:text="Slide Me Demo"
+        android:textColor="@color/white"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_desc_default"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="15dp"
+        android:text="Default :"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_title" />
+
+    <com.adr.slideme.views.CustomSlider
+        android:id="@+id/cs_slider_default"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="8dp"
+        app:csIsTickDescVisible="true"
+        app:csIsTickTooltipVisible="true"
+        app:csIsTickVisible="true"
+        app:csTickInterval="20"
+        app:csValueFrom="0"
+        app:csValueTo="100"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_desc_default" />
+
+    <TextView
+        android:id="@+id/tv_value_desc_default"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="15dp"
+        android:text="Value :"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cs_slider_default" />
+
+    <TextView
+        android:id="@+id/tv_value_default"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="8dp"
+        android:text="0"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_value_desc_default"
+        app:layout_constraintStart_toEndOf="@+id/tv_value_desc_default"
+        app:layout_constraintTop_toTopOf="@+id/tv_value_desc_default" />
+
+    <TextView
+        android:id="@+id/tv_desc_horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="15dp"
+        android:text="Horizontal :"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_value_desc_default" />
+
+    <com.adr.slideme.views.CustomSlider
+        android:id="@+id/cs_slider_horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="8dp"
+        app:csTrackHeight="4dp"
+        app:csIsTickDescVisible="true"
+        app:csIsTickTooltipVisible="true"
+        app:csIsTickVisible="true"
+        app:csMainTrackColor="@color/yellow"
+        app:csSecondTrackColor="@color/red"
+        app:csThumbColor="@color/red"
+        app:csTickColor="@color/yellow"
+        app:csTickDescColor="@color/white"
+        app:csTickInterval="20"
+        app:csTickTooltipColor="@color/yellow"
+        app:csTickTooltipDescColor="@color/black"
+        app:csValueFrom="0"
+        app:csValueTo="100"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_desc_horizontal" />
+
+    <TextView
+        android:id="@+id/tv_value_desc_horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="15dp"
+        android:text="Value :"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cs_slider_horizontal" />
+
+    <TextView
+        android:id="@+id/tv_value_horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="8dp"
+        android:text="0"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_value_desc_horizontal"
+        app:layout_constraintStart_toEndOf="@+id/tv_value_desc_horizontal"
+        app:layout_constraintTop_toTopOf="@+id/tv_value_desc_horizontal" />
+
+    <TextView
+        android:id="@+id/tv_desc_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="15dp"
+        android:text="Vertical :"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_value_desc_horizontal" />
+
+    <com.adr.slideme.views.CustomSlider
+        android:id="@+id/cs_slider_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="8dp"
+        app:csTrackHeight="4dp"
+        app:csOrientation="vertical"
+        app:csIsTickDescVisible="true"
+        app:csIsTickTooltipVisible="true"
+        app:csIsTickVisible="true"
+        app:csMainTrackColor="@color/yellow"
+        app:csSecondTrackColor="@color/red"
+        app:csThumbColor="@color/red"
+        app:csTickColor="@color/yellow"
+        app:csTickDescColor="@color/white"
+        app:csTickInterval="20"
+        app:csTickTooltipColor="@color/yellow"
+        app:csTickTooltipDescColor="@color/black"
+        app:csValueFrom="0"
+        app:csValueTo="100"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_desc_vertical" />
+
+    <TextView
+        android:id="@+id/tv_value_desc_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="15dp"
+        android:text="Value :"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_desc_vertical" />
+
+    <TextView
+        android:id="@+id/tv_value_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="8dp"
+        android:text="0"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_value_desc_vertical"
+        app:layout_constraintStart_toEndOf="@+id/tv_value_desc_vertical"
+        app:layout_constraintTop_toTopOf="@+id/tv_value_desc_vertical" />
+
+    <Button
+        android:id="@+id/btn_prev"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:backgroundTint="@color/black"
+        android:text="Prev"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btn_next"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btn_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:backgroundTint="@color/black"
+        android:text="Next"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btn_prev" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,19 +2,47 @@
 <resources>
 
     <declare-styleable name="CustomSlider">
+        <attr name="csOrientation" format="enum">
+            <enum name="horizontal" value="0"/>
+            <enum name="vertical" value="1"/>
+        </attr>
+        <attr name="csType" format="enum">
+            <enum name="overlay" value="0"/>
+            <enum name="diffColor" value="1"/>
+        </attr>
         <attr name="csValueFrom" format="integer"/>
         <attr name="csValueTo" format="integer"/>
         <attr name="csTrackHeight" format="dimension"/>
+        <attr name="csSecondTrackHeight" format="dimension"/>
+        <attr name="csMainTrackColor" format="reference"/>
+        <attr name="csSecondTrackColor" format="reference"/>
         <attr name="csThumbRadius" format="dimension"/>
         <attr name="csDefaultThumbPosition" format="integer"/>
+        <attr name="csThumbColor" format="reference"/>
         <attr name="csIsTickVisible" format="boolean"/>
         <attr name="csTickInterval" format="integer"/>
         <attr name="csTickRadius" format="dimension"/>
+        <attr name="csTickColor" format="reference"/>
         <attr name="csIsTickDescVisible" format="boolean"/>
         <attr name="csTickDescSize" format="dimension"/>
+        <attr name="csTickDescColor" format="reference"/>
+        <attr name="csTickDescPosition" format="enum">
+            <enum name="left" value="0"/>
+            <enum name="top" value="1"/>
+            <enum name="right" value="2"/>
+            <enum name="bottom" value="3"/>
+        </attr>
         <attr name="csIsTickTooltipVisible" format="boolean"/>
         <attr name="csTickTooltipSize" format="dimension"/>
+        <attr name="csTickTooltipColor" format="reference"/>
+        <attr name="csTickTooltipPosition" format="enum">
+            <enum name="left" value="0"/>
+            <enum name="top" value="1"/>
+            <enum name="right" value="2"/>
+            <enum name="bottom" value="3"/>
+        </attr>
         <attr name="csTickTooltipDescSize" format="dimension"/>
+        <attr name="csTickTooltipDescColor" format="reference"/>
     </declare-styleable>
 
 </resources>

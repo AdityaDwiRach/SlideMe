@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="defaultTrackHeight">4dp</dimen>
+    <dimen name="defaultThumbRadius">6dp</dimen>
+    <dimen name="defaultTickRadius">3dp</dimen>
+    <dimen name="defaultTickDescSize">7sp</dimen>
+    <dimen name="defaultTooltipDescSize">7sp</dimen>
+    <dimen name="defaultTooltipWidth">12dp</dimen>
+</resources>
