@@ -1,12 +1,11 @@
 package com.adr.slideme.helper
 
+import android.content.Context
 import android.view.View
-import com.adr.slideme.model.Coordinate
-import com.adr.slideme.model.SliderTick
+import com.adr.slideme.model.*
 import kotlin.math.min
 
 object CustomSliderHelper {
-
     private fun validateSecondTrackHeight(
         secondTrackHeight: Float,
         isTickVisible: Boolean,
@@ -63,19 +62,26 @@ object CustomSliderHelper {
     ): ArrayList<SliderTick> {
         val listCoordinate = arrayListOf<SliderTick>()
         val amount = ((valueTo - valueFrom) / tickInterval)
-        val intervalSpace =
-            if (orientation == Const.Orientation.VERTICAL.orientation) (measuredHeight.toFloat() - (thumbRadius * 4)) / amount else (measuredWidth.toFloat() - (thumbRadius * 4)) / amount
-        var coordinateX =
-            if (orientation == Const.Orientation.VERTICAL.orientation) (measuredWidth.toFloat() / 2) else thumbRadius * 2
-        var coordinateY =
-            if (orientation == Const.Orientation.VERTICAL.orientation) (measuredHeight.toFloat() - (thumbRadius * 2)) else (measuredHeight.toFloat() / 2)
+
+        val intervalSpace: Float
+        var coordinateX: Float
+        var coordinateY: Float
+
+        if (orientation == Const.Orientation.VERTICAL.orientation) {
+            intervalSpace = (measuredHeight.toFloat() - (thumbRadius * 4)) / amount
+            coordinateX = (measuredWidth.toFloat() / 2)
+            coordinateY = (measuredHeight.toFloat() - (thumbRadius * 2))
+        } else {
+            intervalSpace = (measuredWidth.toFloat() - (thumbRadius * 4)) / amount
+            coordinateX = (thumbRadius * 2)
+            coordinateY = (measuredHeight.toFloat() / 2)
+        }
+
         for ((index, value) in (valueFrom..valueTo step tickInterval).withIndex()) {
-            if (orientation == Const.Orientation.VERTICAL.orientation) {
-                if (index != 0) {
+            if (index != 0) {
+                if (orientation == Const.Orientation.VERTICAL.orientation) {
                     coordinateY -= intervalSpace
-                }
-            } else {
-                if (index != 0) {
+                } else {
                     coordinateX += intervalSpace
                 }
             }
@@ -85,11 +91,11 @@ object CustomSliderHelper {
     }
 
     private fun getNearestTickX(listTickCoordinates: List<SliderTick>, touchX: Float): SliderTick {
-        var currentTickCoor: SliderTick
+        var currentTickCoor = SliderTick(0f, 0f, 0)
         var currentMinRange: Float
         var leftIndex = 0
         var rightIndex = listTickCoordinates.size - 1
-        while (true) {
+        while (leftIndex != rightIndex) {
             val leftMinRange: Float = if (listTickCoordinates[leftIndex].coordinateX < touchX) {
                 touchX - listTickCoordinates[leftIndex].coordinateX
             } else {
@@ -111,21 +117,17 @@ object CustomSliderHelper {
                 leftIndex++
                 listTickCoordinates[rightIndex]
             }
-
-            if (leftIndex == rightIndex) {
-                break
-            }
         }
 
         return currentTickCoor
     }
 
     private fun getNearestTickY(listTickCoordinates: List<SliderTick>, touchY: Float): SliderTick {
-        var currentTickCoor: SliderTick
+        var currentTickCoor = SliderTick(0f, 0f, 0)
         var currentMinRange: Float
         var bottomIndex = 0
         var topIndex = listTickCoordinates.size - 1
-        while (true) {
+        while (bottomIndex != topIndex) {
             val bottomMinRange: Float = if (listTickCoordinates[bottomIndex].coordinateY > touchY) {
                 listTickCoordinates[bottomIndex].coordinateY - touchY
             } else {
@@ -146,10 +148,6 @@ object CustomSliderHelper {
             } else {
                 bottomIndex++
                 listTickCoordinates[topIndex]
-            }
-
-            if (bottomIndex == topIndex) {
-                break
             }
         }
 
@@ -227,7 +225,13 @@ object CustomSliderHelper {
         }
     }
 
-    fun getThumbCoorOnTrack(orientation: Int, measuredWidth: Int, measuredHeight: Int, currentThumbCoor: Float, thumbRadius: Float): Float {
+    fun getThumbCoorOnTrack(
+        orientation: Int,
+        measuredWidth: Int,
+        measuredHeight: Int,
+        currentThumbCoor: Float,
+        thumbRadius: Float
+    ): Float {
         // Thumb, second line, and tooltip stay on the base line
         var thumbStart = currentThumbCoor
         if (orientation == Const.Orientation.VERTICAL.orientation) {
@@ -246,7 +250,12 @@ object CustomSliderHelper {
         return thumbStart
     }
 
-    fun getTriangleCoor(tickTooltipPosition: Int, positionX: Float, positionY: Float, width: Int): Pair<Coordinate, Coordinate> {
+    fun getTriangleCoor(
+        tickTooltipPosition: Int,
+        positionX: Float,
+        positionY: Float,
+        width: Int
+    ): Pair<Coordinate, Coordinate> {
         val first = Coordinate()
         val second = Coordinate()
         when (tickTooltipPosition) {
@@ -295,7 +304,12 @@ object CustomSliderHelper {
         return Pair(first, second)
     }
 
-    fun getCircleCoor(tickTooltipPosition: Int, positionX: Float, positionY: Float, widthToolTip: Int): Coordinate {
+    fun getCircleCoor(
+        tickTooltipPosition: Int,
+        positionX: Float,
+        positionY: Float,
+        widthToolTip: Int
+    ): Coordinate {
         val coor = Coordinate()
         when (tickTooltipPosition) {
             Const.Position.LEFT.position -> {
